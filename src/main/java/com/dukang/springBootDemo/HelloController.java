@@ -21,9 +21,8 @@ public class HelloController {
      */
     @RequestMapping("/hello")
     public String helloWold() {
-        return "Hello World~~~~";
+        return "Hello-2018";
     }
-
     /**
      * springboot 解析json数据
      * @return
@@ -36,5 +35,10 @@ public class HelloController {
         jsonDemo.setCreateDate(new Date());
         jsonDemo.setRemarks("备注字段");
         return jsonDemo;
+    }
+
+    @RequestMapping("/hello2")
+    public String helloWold2() {
+        return "Hello2";
     }
 }
