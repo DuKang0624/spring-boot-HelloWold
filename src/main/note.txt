@@ -1,0 +1,96 @@
+1. spring boot 环境准备
+<!--
+spring boot 父节点依赖,引入这个之后相关的引入就不需要添加version配置，spring boot会自动选择最合适的版本进行添加。
+ -->
+    <parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.4.1.RELEASE</version>
+	</parent>
+java.version 指定jdk版本号：
+<java.version>1.8</java.version>
+添加spring-boot-starter-web依赖
+<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+1.1 编码步骤
+a,新建一个Controller类 类上注释使用@RestMapping 等价于 @RequestMapping && @ResponseBody
+b,新建启动类(App – Main方法) 类上加 @SpringBootApplication, main方面使用 SpringBootApplication.run(***.class, args)
+c,测试代码
+
+
+2.spring boot 解析json数据
+
+2.1 spring boot 默认使用的是jackjson解析数据，直接返回对象，spring boot就会自动解析。
+2.2 使用第三方的解析工具 例如 fastjson， 使用方法如下：
+    a,引入依赖
+        <dependency>
+        			<groupId>com.alibaba</groupId>
+        			<artifactId>fastjson</artifactId>
+        			<version>1.2.15</version>
+        </dependency>
+        这里要说下很重要的话，官方文档说的1.2.10以后，会有两个方法支持HttpMessageconvert，
+        一个是FastJsonHttpMessageConverter，支持4.2以下的版本，
+        一个是FastJsonHttpMessageConverter4支持4.2以上的版本，具体有什么区别暂时没有深入研究。
+        这里也就是说：低版本的就不支持了，所以这里最低要求就是1.2.10+。
+    b,配置fastjson
+        方法一：
+            （1）启动类继承extends WebMvcConfigurerAdapter
+            （2）覆盖方法configureMessageConverters
+            @SpringBootApplication
+            public class ApiCoreApp  extends WebMvcConfigurerAdapter {
+
+            	@Override
+            	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+                	super.configureMessageConverters(converters);
+
+                    FastJsonHttpMessageConverter fastConverter = new FastJsonHttpMessageConverter();
+             
+                    FastJsonConfig fastJsonConfig = new FastJsonConfig();
+                    fastJsonConfig.setSerializerFeatures(
+                            SerializerFeature.PrettyFormat
+                    );
+                    fastConverter.setFastJsonConfig(fastJsonConfig);
+
+                	converters.add(fastConverter);
+            	}
+            }
+        方法二：
+            在App.java启动类中，注入Bean : HttpMessageConverters
+                @Bean
+                	public HttpMessageConverters fastJsonHttpMessageConverters() {
+                		FastJsonHttpMessageConverter fastConverter = new FastJsonHttpMessageConverter();
+                		FastJsonConfig fastJsonConfig = new FastJsonConfig();
+                		fastJsonConfig.setSerializerFeatures(SerializerFeature.PrettyFormat);
+                		fastConverter.setFastJsonConfig(fastJsonConfig);
+                		HttpMessageConverter<?> converter = fastConverter;
+                		return new HttpMessageConverters(converter);
+                	}
+3. spring boot 热部署（有很多方式的热部署，下面只记录最强大最方面的热部署）
+    使用 spring boot devtools 插件实现热部署
+        a, 添加依赖包：
+           <dependency>
+                       <groupId>org.springframework.boot</groupId>
+                       <artifactId>spring-boot-devtools</artifactId>
+                       <optional>true</optional>
+                      <scope>true</scope>
+           </dependency>
+        b,添加spring-boot-maven-plugin：
+          <build>
+          		<plugins>
+          		    <plugin>
+          	            <groupId>org.springframework.boot</groupId>
+          	            <artifactId>spring-boot-maven-plugin</artifactId>
+          	            <configuration>
+          	          		<!--fork :  如果没有该项配置，devtools不会起作用，即应用不会restart -->
+          	                <fork>true</fork>
+          	            </configuration>
+          	        </plugin>
+          		</plugins>
+             </build>
+
+
+
+
+
